@@ -1,5 +1,6 @@
 package br.com.cotiinformatica.api.cliente.infrastructure.service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -10,8 +11,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import br.com.cotiinformatica.api.cliente.domain.collections.LogClientes;
 import br.com.cotiinformatica.api.cliente.domain.entities.Cliente;
 import br.com.cotiinformatica.api.cliente.domain.entities.Endereco;
+import br.com.cotiinformatica.api.cliente.infrastructure.repositories.ClienteMongoRepository;
 import br.com.cotiinformatica.api.cliente.infrastructure.repositories.ClienteRepository;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,6 +24,9 @@ public class ClienteService {
 
 	@Autowired
 	private ClienteRepository clienteRepository;
+	
+	@Autowired
+	private ClienteMongoRepository clienteMongoRepository;
 
 	public ResponseEntity<Cliente> create(Cliente cliente) {
 		
@@ -42,6 +48,15 @@ public class ClienteService {
 				endereco.setCliente(cliente);
 			}
 			clienteRepository.save(cliente);
+			
+			
+			LogClientes logClientes = new LogClientes();
+			logClientes.setId(UUID.randomUUID());
+			logClientes.setDataHora(Instant.now());
+			logClientes.setOperacao("CADASTRO");
+			logClientes.setDescriao("Cliente cadastrado: " + cliente.getNome());
+			clienteMongoRepository.save(logClientes);
+			
 			log.info("Os dados de cliente foram cadastrado com sucesso!!!");
 			return ResponseEntity.status(HttpStatus.CREATED).body(cliente);
 
@@ -62,7 +77,7 @@ public class ClienteService {
 			if (!clienteRepository.existsById(idCliente)) {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
 			}
-			
+			// Obtenha o cliente existente do banco de dados
 			Cliente clienteExistente = clienteRepository.findById(idCliente).orElse(null);
 
 			cliente.setIdCliente(idCliente);
