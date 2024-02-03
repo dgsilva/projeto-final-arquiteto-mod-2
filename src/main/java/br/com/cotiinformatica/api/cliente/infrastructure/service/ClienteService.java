@@ -85,6 +85,14 @@ public class ClienteService {
 				endereco.setCliente(clienteExistente);
 			}
 			clienteRepository.save(cliente);
+			
+			LogClientes logClientes = new LogClientes();
+			logClientes.setId(UUID.randomUUID());
+			logClientes.setDataHora(Instant.now());
+			logClientes.setOperacao("ALTERAÇÃO");
+			logClientes.setDescriao("Cliente alterado com sucesso: " + cliente.getNome());
+			clienteMongoRepository.save(logClientes);
+			
 			log.info("Cliente alterado com sucesso");
 			return ResponseEntity.status(HttpStatus.OK).body(cliente);
 
@@ -100,6 +108,14 @@ public class ClienteService {
 
 		if (clienteExcluir.isPresent()) {
 			clienteRepository.delete(clienteExcluir.get());
+			
+			LogClientes logClientes = new LogClientes();
+			logClientes.setId(UUID.randomUUID());
+			logClientes.setDataHora(Instant.now());
+			logClientes.setOperacao("EXCLUSÃO");
+			logClientes.setDescriao("Cliente excluido com sucesso: " + idCliente);
+			clienteMongoRepository.save(logClientes);
+			
 			log.info("Cliente excluido com sucesso");
 		} else {
 			log.error("Cliente não encontrado");
