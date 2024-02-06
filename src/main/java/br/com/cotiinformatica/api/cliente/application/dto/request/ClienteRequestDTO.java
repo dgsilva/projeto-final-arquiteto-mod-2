@@ -24,7 +24,7 @@ public class ClienteRequestDTO {
 	private String email;
 	@NotBlank(message = "O CPF é obrigatório")
 	@Pattern(regexp = "^[0-9]{11}$", message = "O CPF deve ter 11 dígitos numéricos.")
-	@CPF
+	@CPF(message = "CPF está inválido")
 	private String cpf;
 	@NotBlank(message = "Data Nascimento é Obrigatorio")
 	private String dataNascimento;
