@@ -5,12 +5,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import br.com.cotiinformatica.api.cliente.application.dto.request.ClienteRequestDTO;
 import br.com.cotiinformatica.api.cliente.domain.collections.LogClientes;
 import br.com.cotiinformatica.api.cliente.domain.entities.Cliente;
 import br.com.cotiinformatica.api.cliente.domain.entities.Endereco;
@@ -26,24 +28,29 @@ public class ClienteService {
 	private ClienteRepository clienteRepository;
 	
 	@Autowired
+	private ModelMapper modelMapper;
+	
+	@Autowired
 	private ClienteMongoRepository clienteMongoRepository;
 
-	public ResponseEntity<Cliente> create(Cliente cliente) {
+	public ResponseEntity<Cliente> create(ClienteRequestDTO dto) {
+		Cliente cliente = new Cliente();
 		
-		if(clienteRepository.findByEmail(cliente.getEmail()).isPresent()) {
+		if(clienteRepository.findByEmail(dto.getEmail()).isPresent()) {
 			log.info("Email, já está cadatrado, tente outro");
 			throw new IllegalArgumentException("Email, já está cadatrado, tente outro");
 		}
 		
-		if(clienteRepository.findByCpf(cliente.getCpf()).isPresent()) {
+		if(clienteRepository.findByCpf(dto.getCpf()).isPresent()) {
 			log.info("CPF, já está cadatrado, tente outro");
 			throw new IllegalArgumentException("CPF, já está cadatrado, tente outro");
 		}
 		
 		try {
+			cliente = modelMapper.map(dto, Cliente.class);
 			cliente.setIdCliente(UUID.randomUUID());
 
-			for (Endereco endereco : cliente.getEnderecos()) {
+			for (Endereco endereco : dto.getEnderecos()) {
 				endereco.setIdEndereco(UUID.randomUUID());
 				endereco.setCliente(cliente);
 			}
@@ -54,7 +61,7 @@ public class ClienteService {
 			logClientes.setId(UUID.randomUUID());
 			logClientes.setDataHora(Instant.now());
 			logClientes.setOperacao("CADASTRO");
-			logClientes.setDescriao("Cliente cadastrado: " + cliente.getNome());
+			logClientes.setDescriao("Cliente cadastrado: " + dto.getNome());
 			clienteMongoRepository.save(logClientes);
 			
 			log.info("Os dados de cliente foram cadastrado com sucesso!!!");
@@ -71,11 +78,16 @@ public class ClienteService {
 		return clienteRepository.findAll();
 	}
 
-	public ResponseEntity<Cliente> atualizar(Cliente cliente, UUID idCliente) {
+	public ResponseEntity<Cliente> atualizar(ClienteRequestDTO dto, UUID idCliente) {
+		Cliente cliente = new Cliente();
 		try {
 
 			if (!clienteRepository.existsById(idCliente)) {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+			}
+			cliente = modelMapper.map(dto, Cliente.class);
+			if (cliente == null) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
 			}
 			// Obtenha o cliente existente do banco de dados
 			Cliente clienteExistente = clienteRepository.findById(idCliente).orElse(null);
@@ -85,20 +97,20 @@ public class ClienteService {
 				endereco.setCliente(clienteExistente);
 			}
 			clienteRepository.save(cliente);
-			
+
 			LogClientes logClientes = new LogClientes();
 			logClientes.setId(UUID.randomUUID());
 			logClientes.setDataHora(Instant.now());
 			logClientes.setOperacao("ALTERAÇÃO");
 			logClientes.setDescriao("Cliente alterado com sucesso: " + cliente.getNome());
 			clienteMongoRepository.save(logClientes);
-			
+
 			log.info("Cliente alterado com sucesso");
 			return ResponseEntity.status(HttpStatus.OK).body(cliente);
 
 		} catch (Exception e) {
 			log.error("Erro ao realizar alteração do cliente");
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(cliente);
 		}
 	}
 

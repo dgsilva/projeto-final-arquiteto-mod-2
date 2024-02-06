@@ -16,8 +16,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.cotiinformatica.api.cliente.application.dto.request.ClienteRequestDTO;
 import br.com.cotiinformatica.api.cliente.domain.entities.Cliente;
 import br.com.cotiinformatica.api.cliente.infrastructure.service.ClienteService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("api/clientes")
@@ -26,20 +28,22 @@ public class ClienteController {
 	@Autowired
 	private ClienteService clienteService;
 	
+	@ResponseStatus(code = HttpStatus.CREATED)
 	@PostMapping
-	public ResponseEntity<Cliente> create(@RequestBody Cliente cliente) {
-		return clienteService.create(cliente); 
+	public ResponseEntity<Cliente> create(@Valid @RequestBody ClienteRequestDTO dto) {
+		return clienteService.create(dto); 
 	}
 	
 	@GetMapping
 	public List<Cliente> findAll(){
 		return clienteService.findAll();
 	}
-	
+	@ResponseStatus(code = HttpStatus.OK)
 	@PutMapping("/{idCliente}")
-	public ResponseEntity<Cliente> update(@RequestBody Cliente cliente, @PathVariable UUID idCliente){
-		return clienteService.atualizar(cliente, idCliente);
+	public ResponseEntity<Cliente> update(@Valid @RequestBody ClienteRequestDTO dto, @PathVariable UUID idCliente){
+		return clienteService.atualizar(dto, idCliente);
 	}
+	
 	@ResponseStatus(code = HttpStatus.NO_CONTENT)
 	@DeleteMapping("/{idCliente}")
 	public Cliente delete(@PathVariable UUID idCliente) {
