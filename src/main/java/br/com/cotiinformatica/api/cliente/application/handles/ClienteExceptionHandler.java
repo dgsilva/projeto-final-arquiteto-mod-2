@@ -9,10 +9,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import br.com.cotiinformatica.api.cliente.application.dto.request.ErrorResponseDto;
 import br.com.cotiinformatica.api.cliente.domain.exception.ClienteException;
 
 @ControllerAdvice
-public class UserExceptionHandler {
+public class ClienteExceptionHandler {
 
 	@ExceptionHandler(ClienteException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)

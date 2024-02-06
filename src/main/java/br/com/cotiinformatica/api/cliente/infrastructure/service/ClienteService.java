@@ -12,10 +12,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import br.com.cotiinformatica.api.cliente.application.dto.request.ClienteMessageDto;
 import br.com.cotiinformatica.api.cliente.application.dto.request.ClienteRequestDTO;
 import br.com.cotiinformatica.api.cliente.domain.collections.LogClientes;
 import br.com.cotiinformatica.api.cliente.domain.entities.Cliente;
 import br.com.cotiinformatica.api.cliente.domain.entities.Endereco;
+import br.com.cotiinformatica.api.cliente.infrastructure.producers.ClienteMessageProducer;
 import br.com.cotiinformatica.api.cliente.infrastructure.repositories.ClienteMongoRepository;
 import br.com.cotiinformatica.api.cliente.infrastructure.repositories.ClienteRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +36,12 @@ public class ClienteService {
 	
 	@Autowired
 	private ClienteMongoRepository clienteMongoRepository;
+	
+	@Autowired
+	ObjectMapper objectMapper;
+	
+	@Autowired
+	ClienteMessageProducer clienteMessageProducer;
 
 	public ResponseEntity<Cliente> create(ClienteRequestDTO dto) {
 		Cliente cliente = new Cliente();
@@ -55,7 +65,7 @@ public class ClienteService {
 				endereco.setCliente(cliente);
 			}
 			clienteRepository.save(cliente);
-			
+			createWelcomeMessage(cliente);
 			
 			LogClientes logClientes = new LogClientes();
 			logClientes.setId(UUID.randomUUID());
@@ -140,5 +150,30 @@ public class ClienteService {
 	
 	private void extractedMessage() {
 		throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado");
+	}
+	
+	
+private void createWelcomeMessage(Cliente cliente) {
+		
+		ClienteMessageDto dto = new ClienteMessageDto();
+		dto.setEmailTo(cliente.getEmail());
+		dto.setSubject("Conta criada com sucesso - API de cliente.");
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append("<div>");
+		sb.append("<p>Parabéns " + cliente.getNome() + ", sua conta de usuário foi criada com sucesso</p>");
+		sb.append("<p>Att,</p>");
+		sb.append("<p>Equipe COTI Informática,</p>");
+		sb.append("</div>");
+		
+		dto.setBody(sb.toString());
+		
+		try {
+			String message = objectMapper.writeValueAsString(dto);
+			clienteMessageProducer.sendMessage(message);
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

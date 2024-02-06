@@ -1,4 +1,4 @@
-package br.com.cotiinformatica.api.cliente.application.handles;
+package br.com.cotiinformatica.api.cliente.application.dto.request;
 
 import java.util.List;
 
