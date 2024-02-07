@@ -20,6 +20,7 @@ import br.com.cotiinformatica.api.cliente.application.dto.request.ClienteRequest
 import br.com.cotiinformatica.api.cliente.domain.entities.Cliente;
 import br.com.cotiinformatica.api.cliente.infrastructure.service.ClienteService;
 import jakarta.validation.Valid;
+import jakarta.websocket.server.PathParam;
 
 @RestController
 @RequestMapping("api/clientes")
@@ -47,7 +48,23 @@ public class ClienteController {
 	@ResponseStatus(code = HttpStatus.NO_CONTENT)
 	@DeleteMapping("/{idCliente}")
 	public Cliente delete(@PathVariable UUID idCliente) {
-	return clienteService.excluir(idCliente);	
+		return clienteService.excluir(idCliente);
+	}
+	
+	
+	@GetMapping("/{idCliente}")
+	public ResponseEntity<Cliente> findById(@PathVariable UUID idCliente) { 
+		return clienteService.findById(idCliente);
+	}
+	
+	@GetMapping("/name{nome}")
+	public ResponseEntity<Cliente> findByNome(@PathParam("nome") String nome) { 
+		return clienteService.findByNome(nome);
+	}
+	
+	@GetMapping("/por-nome")
+	public List<Cliente> findByNomeLike(String nome) { 
+		return clienteService.findByNomeContaining(nome);
 	}
 	
 }
