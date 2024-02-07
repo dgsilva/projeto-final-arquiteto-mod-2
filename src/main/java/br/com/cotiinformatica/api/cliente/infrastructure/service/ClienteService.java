@@ -1,5 +1,6 @@
 package br.com.cotiinformatica.api.cliente.infrastructure.service;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
@@ -15,7 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import br.com.cotiinformatica.api.cliente.application.dto.request.ClienteMessageDto;
 import br.com.cotiinformatica.api.cliente.application.dto.request.ClienteRequestDTO;
 import br.com.cotiinformatica.api.cliente.application.dto.response.ClienteResponseDTO;
@@ -25,6 +25,7 @@ import br.com.cotiinformatica.api.cliente.domain.entities.Endereco;
 import br.com.cotiinformatica.api.cliente.infrastructure.producers.ClienteMessageProducer;
 import br.com.cotiinformatica.api.cliente.infrastructure.repositories.ClienteMongoRepository;
 import br.com.cotiinformatica.api.cliente.infrastructure.repositories.ClienteRepository;
+import br.com.cotiinformatica.api.cliente.reports.ClienteReports;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -45,6 +46,9 @@ public class ClienteService {
 
 	@Autowired
 	ClienteMessageProducer clienteMessageProducer;
+	
+	@Autowired
+	ClienteReports clienteReports;
 
 	public ResponseEntity<Cliente> create(ClienteRequestDTO dto) {
 		Cliente cliente = new Cliente();
@@ -233,4 +237,15 @@ public class ClienteService {
 		}
 	}
 	
+	public byte[] getReport()throws Exception{
+		//Consultando todos os clientes do banco de dados
+		List<Cliente> clientes = clienteRepository.findAll();
+		
+		//gerando o relatorio em PDF
+		ByteArrayInputStream stream = clienteReports.createPdf(clientes);
+		
+		
+		//Retornando o relatorio em bytes
+		return stream.readAllBytes();
+	}
 }

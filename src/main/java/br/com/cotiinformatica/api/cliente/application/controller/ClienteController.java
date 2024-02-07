@@ -4,8 +4,12 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
 import br.com.cotiinformatica.api.cliente.application.dto.request.ClienteRequestDTO;
 import br.com.cotiinformatica.api.cliente.domain.entities.Cliente;
 import br.com.cotiinformatica.api.cliente.infrastructure.service.ClienteService;
@@ -63,5 +68,15 @@ public class ClienteController {
 	@GetMapping("/por-nome")
 	public List<Cliente> findByNomeLike(String nome) { 
 		return clienteService.findByNomeContaining(nome);
+	}
+	
+	@GetMapping("gerar-relatorio")
+	public ResponseEntity<byte[]> getRelatorio() throws Exception {
+	    MultiValueMap<String, String> headersMap = new LinkedMultiValueMap<>();
+	    headersMap.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_PDF_VALUE);
+	    headersMap.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=relatorio.pdf");
+	    HttpHeaders headers = new HttpHeaders(headersMap);
+	    
+	    return ResponseEntity.ok().headers(headers).body(clienteService.getReport());
 	}
 }
