@@ -30,4 +30,6 @@ public class Cliente {
 	private String dataNascimento;
 	@OneToMany(mappedBy = "cliente",cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Endereco> enderecos = new ArrayList<>(); 
+	@Column
+	private byte[] foto;
 }

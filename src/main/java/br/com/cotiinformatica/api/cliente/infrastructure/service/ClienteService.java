@@ -1,5 +1,6 @@
 package br.com.cotiinformatica.api.cliente.infrastructure.service;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -10,12 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.cotiinformatica.api.cliente.application.dto.request.ClienteMessageDto;
 import br.com.cotiinformatica.api.cliente.application.dto.request.ClienteRequestDTO;
+import br.com.cotiinformatica.api.cliente.application.dto.response.ClienteResponseDTO;
 import br.com.cotiinformatica.api.cliente.domain.collections.LogClientes;
 import br.com.cotiinformatica.api.cliente.domain.entities.Cliente;
 import br.com.cotiinformatica.api.cliente.domain.entities.Endereco;
@@ -169,6 +172,42 @@ public class ClienteService {
 	
 	public List<Cliente> findByNomeContaining(String nome) {
 		return clienteRepository.findByNomeContaining(nome);
+	}
+	
+	public ResponseEntity<ClienteResponseDTO>uploadFotos(UUID idCliente, MultipartFile imagem){
+		
+		String tipo = imagem.getContentType();
+		if(tipo.equals("image/jpeg") || tipo.equals("image/jpg") || tipo.equals("image/png")) {
+			
+			byte[]dados = null;
+			
+			try {
+				dados = imagem.getBytes();
+			}catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			Cliente cliente = upload(idCliente, dados);
+			ClienteResponseDTO response = modelMapper.map(cliente, ClienteResponseDTO.class);
+			
+			return ResponseEntity.status(HttpStatus.OK).body(response);
+		}else {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+		}
+		
+	}
+	
+	public Cliente upload(UUID id, byte[] foto) {
+		Optional<Cliente> optional = clienteRepository.findById(id);
+		
+		if (optional.isEmpty()) {
+			throw new IllegalArgumentException("Cliente Invalido.");
+		}
+		
+		Cliente cliente = optional.get();
+		cliente.setFoto(foto);
+		clienteRepository.save(cliente);
+		return cliente;
 	}
 	
 	private void createWelcomeMessage(Cliente cliente) {

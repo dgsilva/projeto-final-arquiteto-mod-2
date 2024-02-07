@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
 import br.com.cotiinformatica.api.cliente.application.dto.request.ClienteRequestDTO;
 import br.com.cotiinformatica.api.cliente.domain.entities.Cliente;
 import br.com.cotiinformatica.api.cliente.infrastructure.service.ClienteService;
@@ -51,7 +50,6 @@ public class ClienteController {
 		return clienteService.excluir(idCliente);
 	}
 	
-	
 	@GetMapping("/{idCliente}")
 	public ResponseEntity<Cliente> findById(@PathVariable UUID idCliente) { 
 		return clienteService.findById(idCliente);
@@ -66,5 +64,4 @@ public class ClienteController {
 	public List<Cliente> findByNomeLike(String nome) { 
 		return clienteService.findByNomeContaining(nome);
 	}
-	
 }
