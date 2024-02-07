@@ -49,7 +49,7 @@ public class SwaggerConfig {
     }
     
     private Info commonsInfo() {
-        return new Info().title("API drogaria").description("Documentação API de Cliente.")
+        return new Info().title("API Cliente").description("Documentação API de Cliente.")
                 .license(new License().name("Apache License Version 2.0")
                         .url("https://www.apache.org/licenses/LICENSE-2.0"))
                 .contact(new Contact().name("DBS").url("https://www.dbs.com.br/").email("diegobizerra@gmail.com"));
