@@ -4,7 +4,9 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,5 +26,9 @@ public class ClienteUploadControllers {
 	@PostMapping(consumes = { "multipart/form-data" })
 	public ResponseEntity<ClienteResponseDTO> uploadFotos(@RequestParam("idCliente") UUID idCliente, @RequestParam("imagem") MultipartFile imagem ){
 		return clienteService.uploadFotos(idCliente, imagem);
+	}
+	@PutMapping(value =  "/{idCliente}/atualizar-foto", consumes = "multipart/form-data")
+	public ResponseEntity<ClienteResponseDTO> atualizarFotoCliente(@PathVariable UUID idCliente, @RequestParam("imagem") MultipartFile imagem){
+		return clienteService.atualizarFotoCliente(idCliente, imagem);
 	}
 }

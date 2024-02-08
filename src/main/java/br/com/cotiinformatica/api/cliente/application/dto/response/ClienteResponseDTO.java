@@ -6,8 +6,12 @@ import java.util.UUID;
 
 
 import br.com.cotiinformatica.api.cliente.domain.entities.Endereco;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ClienteResponseDTO {
 
 	private UUID idCliente;
