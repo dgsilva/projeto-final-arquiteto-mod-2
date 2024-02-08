@@ -205,6 +205,28 @@ public class ClienteService {
 		
 	}
 	
+	
+	public ResponseEntity<ClienteResponseDTO> atualizarFotoCliente(UUID idCliente,MultipartFile imagem) {
+	    if (imagem == null || imagem.isEmpty()) {
+	        return ResponseEntity.badRequest().body(null);
+	    }
+	    
+	    String tipo = imagem.getContentType();
+	    if (tipo == null || (!tipo.equals("image/jpeg") && !tipo.equals("image/jpg") && !tipo.equals("image/png"))) {
+	        return ResponseEntity.badRequest().body(null);
+	    }
+
+	    try {
+	        byte[] dados = imagem.getBytes();
+	        Cliente cliente = upload(idCliente, dados);
+	        ClienteResponseDTO response = modelMapper.map(cliente, ClienteResponseDTO.class);
+	        return ResponseEntity.ok().body(response);
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+	    }
+	}
+	
 	public Cliente upload(UUID id, byte[] foto) {
 		Optional<Cliente> optional = clienteRepository.findById(id);
 		
