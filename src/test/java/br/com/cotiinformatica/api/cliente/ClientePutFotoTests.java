@@ -1,10 +1,10 @@
 package br.com.cotiinformatica.api.cliente;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -12,11 +12,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.util.ResourceUtils;
-
-import br.com.cotiinformatica.api.cliente.domain.entities.Cliente;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.web.multipart.MultipartFile;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import br.com.cotiinformatica.api.cliente.infrastructure.service.ClienteService;
 
 @SpringBootTest
@@ -30,27 +34,30 @@ class ClientePutFotoTests {
     ClienteService clienteService;
 
     @Test
-    public void clientesAtualizarFotoPutTest() throws Exception {
-        // Carregar o arquivo de imagem de teste
-        InputStream inputStream = new FileInputStream(ResourceUtils.getFile("classpath:test_image.jpg"));
-        MockMultipartFile multipartFile = new MockMultipartFile("file", "test_image.jpg", "image/jpeg", inputStream);
-
-        // Mock do serviço para simular o comportamento
-        Cliente cliente = new Cliente();
-        cliente.setIdCliente(UUID.randomUUID()); // Suponha que o cliente tenha um ID
-        cliente.setNome("Nome do Cliente"); // Suponha que o cliente tenha um nome
-
-//        Mockito.when(clienteService.atualizarFotoCliente(any(), any())).thenReturn(cliente);
-
-        // Realizar a solicitação PUT ao endpoint
-//        ResponseEntity<ClienteResponseDTO> responseEntity = ResponseEntity.ok(new ClienteResponseDTO(cliente));
+    public void testUploadFotoCliente() throws Exception {
+        // Dados fictícios do cliente
+        UUID clienteIdExistente = UUID.fromString("610cf5b2-fff1-437d-ad91-c55fdcb81ef4"); // Substitua pelo ID existente na base de dados
         
-        // Verifique se a resposta está OK
-        mockMvc.perform(put("/api/clientes/atualizar-foto")
-                .param("clienteId", "1") // Suponha que o ID do cliente seja 1
-                .param("fotoId", "0c8cbaf0-6cd5-4437-9cd2-d8cb066d6289") // ID da foto
-                .content(multipartFile.getBytes())
-                .contentType("image/jpeg"))
+        // Carregar a imagem do arquivo
+        Path imagePath = Paths.get("src/test/java/testes-desenvolvimento.jpg");
+        byte[] content = Files.readAllBytes(imagePath);
+        
+        // Criando um MockMultipartFile com dados da imagem
+        MockMultipartFile imagem = new MockMultipartFile("imagem", "testes-desenvolvimento.jpg", "image/jpeg", content);
+
+        // Mockando o comportamento do serviço
+        when(clienteService.atualizarFotoCliente(any(UUID.class), any(MultipartFile.class)))
+            .thenReturn(ResponseEntity.ok().build());
+
+        // Construindo a solicitação PUT corretamente
+        MockHttpServletRequestBuilder requestBuilder = 
+                put("/api/clientes/foto/{idCliente}/atualizar-foto", clienteIdExistente)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .content(imagem.getBytes());
+        
+        // Executando a solicitação e verificando o status da resposta
+        mockMvc.perform(requestBuilder)
                 .andExpect(status().isOk());
     }
+
 }
