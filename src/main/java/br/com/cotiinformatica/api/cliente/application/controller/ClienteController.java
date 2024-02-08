@@ -1,6 +1,7 @@
 package br.com.cotiinformatica.api.cliente.application.controller;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -78,5 +80,10 @@ public class ClienteController {
 	    HttpHeaders headers = new HttpHeaders(headersMap);
 	    
 	    return ResponseEntity.ok().headers(headers).body(clienteService.getReport());
+	}
+	
+	@PatchMapping("/{idCliente}")
+	public ResponseEntity<Cliente>atualizarParcial(@PathVariable UUID idCliente, @RequestBody Map<String,Object>campos){
+		return clienteService.atualizarParcial(idCliente, campos);
 	}
 }
