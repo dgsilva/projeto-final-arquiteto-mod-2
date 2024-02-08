@@ -4,18 +4,22 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.lang.reflect.Field;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import br.com.cotiinformatica.api.cliente.application.dto.request.ClienteMessageDto;
 import br.com.cotiinformatica.api.cliente.application.dto.request.ClienteRequestDTO;
 import br.com.cotiinformatica.api.cliente.application.dto.response.ClienteResponseDTO;
@@ -248,4 +252,49 @@ public class ClienteService {
 		//Retornando o relatorio em bytes
 		return stream.readAllBytes();
 	}
+	
+	
+	 public ResponseEntity<Cliente>atualizarParcial(UUID idCliente, Map<String,Object>campos){
+		Cliente clienteAtual = clienteRepository.findById(idCliente).orElse(null);
+		
+		if(clienteAtual == null) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+		}
+		
+		merge(campos, clienteAtual);
+		
+		try {
+	        clienteRepository.save(clienteAtual);
+	        
+	        LogClientes logClientes = new LogClientes();
+	        logClientes.setId(UUID.randomUUID());
+	        logClientes.setDataHora(Instant.now());
+	        logClientes.setOperacao("ALTERAÇÃO PARCIAL");
+	        logClientes.setDescriao("Cliente alterado parcialmente com sucesso: " + clienteAtual.getNome());
+	        clienteMongoRepository.save(logClientes);
+	        
+	        log.info("Cliente alterado parcialmente com sucesso");
+	        return ResponseEntity.status(HttpStatus.OK).body(clienteAtual);
+	    } catch (Exception e) {
+	        log.error("Erro ao realizar alteração parcial do cliente");
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(clienteAtual);
+	    }
+	}
+	
+	private void merge(Map<String, Object> dadosOrigem, Cliente cliente) {
+		ObjectMapper objectMapper = new ObjectMapper();
+		Cliente clienteOrigem = objectMapper.convertValue(dadosOrigem, Cliente.class);
+
+		dadosOrigem.forEach((nomePropriedade, valorPropriedade) -> {
+			try {
+				Field field = cliente.getClass().getDeclaredField(nomePropriedade);
+				field.setAccessible(true);
+				Object novoValor = ReflectionUtils.getField(field, clienteOrigem);
+				ReflectionUtils.setField(field, cliente, novoValor);
+			} catch (NoSuchFieldException e) {
+				log.error("Campo inválido: " + nomePropriedade);
+			}
+		});
+	}
+	
 }
