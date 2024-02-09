@@ -37,11 +37,10 @@ class ClientesCreateTests {
 		Cliente dto = new Cliente();
 		dto.setIdCliente(UUID.randomUUID());
 		dto.setNome(faker.name().fullName());
-		String cpf = "432.843.960-04";
+		String cpf = "733.939.200-90";
 		dto.setCpf(cpf.replace(".","").replace("-",""));
 		dto.setEmail(faker.internet().emailAddress());
 		dto.setDataNascimento("1986-06-15");
-
 		List<Endereco> enderecos = new ArrayList<>();
 		for (int i = 0; i < 1; i++) {
 			Endereco endereco = new Endereco();
