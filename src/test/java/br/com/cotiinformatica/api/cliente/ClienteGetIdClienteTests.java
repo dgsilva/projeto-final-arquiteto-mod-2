@@ -29,7 +29,7 @@ class ClienteGetIdClienteTests {
 	 @Test
 	    public void testConsultarClienteExistente() throws Exception {
 	        // Gerar um ID de cliente fictício
-	        UUID clienteIdExistente = UUID.fromString("ID_EXISTENTE_DO_CLIENTE"); // Substitua pelo ID existente na base de dados
+	        UUID clienteIdExistente = UUID.fromString("89510c37-ee66-4d37-9bfa-360dd95dd7ea"); // Substitua pelo ID existente na base de dados
 
 	        // Realizar uma chamada GET para consultar o cliente pelo ID
 	        mockMvc.perform(get("/api/clientes/{idCliente}", clienteIdExistente)

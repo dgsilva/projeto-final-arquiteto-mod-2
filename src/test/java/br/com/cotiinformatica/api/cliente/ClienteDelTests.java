@@ -27,11 +27,11 @@ class ClienteDelTests {
 	@Test
     public void testDeletarClienteExistente() throws Exception {
         // Gerar um ID de cliente fictício
-        UUID clienteIdExistente = UUID.fromString("477d8c8d-ed0b-4b3c-8a25-49a146cc4fe5"); // Substitua pelo ID existente na base de dados
+        UUID clienteIdExistente = UUID.fromString("adadcaf7-3fe3-42d8-a24d-d6d62fc67084"); // Substitua pelo ID existente na base de dados
 
         // Realizar uma chamada DELETE para deletar o cliente pelo ID
         mockMvc.perform(delete("/api/clientes/{idCliente}", clienteIdExistente))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 	
 	
