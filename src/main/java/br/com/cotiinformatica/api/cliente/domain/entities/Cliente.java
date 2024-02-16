@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -31,5 +33,6 @@ public class Cliente {
 	@OneToMany(mappedBy = "cliente",cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Endereco> enderecos = new ArrayList<>(); 
 	@Column
+	@JsonIgnore
 	private byte[] foto;
 }
